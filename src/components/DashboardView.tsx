@@ -78,8 +78,8 @@ export default function DashboardView({
     if (!txTitle || !txAmount || isNaN(Number(txAmount))) return;
     
     // Check permission restrictions for safety
-    if (userRole === "staff" && txType === "expense") {
-      alert("Permission Denied: Staff are restricted from recording custom office expenses.");
+    if (userRole === "general" && txType === "expense") {
+      alert("Permission Denied: General users are restricted from recording custom office expenses.");
       return;
     }
 
@@ -98,8 +98,8 @@ export default function DashboardView({
   };
 
   const isRestricted = (metric: string) => {
-    // Staff has strict restrictions: Only Today Sales, stock level count. Rest are locked.
-    if (userRole === "staff") {
+    // General user has strict restrictions: Only Today Sales, stock level count. Rest are locked.
+    if (userRole === "general") {
       return ["profit", "purchase", "expense", "bank", "cash", "outstanding"].includes(metric);
     }
     return false;
@@ -159,7 +159,7 @@ export default function DashboardView({
               <g key={i}>
                 <circle cx={p.x} cy={p.y} r="4" fill={isDark ? "#1E293B" : "#FFFFFF"} stroke="#2563EB" strokeWidth="2.5" />
                 <text x={p.x} y={p.y - 8} fontSize="7" fill={isDark ? "#94A3B8" : "#475569"} textAnchor="middle" fontWeight="bold">
-                  ${Math.round(p.value)}
+                  ₹{Math.round(p.value)}
                 </text>
               </g>
             ))}
@@ -193,7 +193,7 @@ export default function DashboardView({
 
       {/* Hero Welcome Row */}
       <div className="px-4 pt-4 pb-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success Accounting ERP</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success Business</span>
         <h2 className={`text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
           Welcome, {userName}!
         </h2>
@@ -203,7 +203,7 @@ export default function DashboardView({
       </div>
 
       {/* GRID 1: High Level Metrics */}
-      <div className="px-4 py-3 grid grid-cols-2 gap-3.5">
+      <div className="px-4 py-3 grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card: Today Sales */}
         <div className={`p-5 rounded-[32px] border transition-all ${
           isDark ? "bg-slate-800/80 border-slate-705/10 shadow-lg" : "bg-white border-slate-100 shadow-sm"
@@ -215,7 +215,7 @@ export default function DashboardView({
             </div>
           </div>
           <span className={`text-xl font-black tracking-tight block leading-none mb-1 ${isDark ? "text-blue-400" : "text-blue-900"}`}>
-            ${totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <div className="text-[10px] text-green-600 font-bold bg-green-50 self-start inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full">
             <ArrowUpRight className="w-2.5 h-2.5" />
@@ -240,7 +240,7 @@ export default function DashboardView({
             </div>
           </div>
           <span className={`text-xl font-black tracking-tight block leading-none mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${totalPurchases.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{totalPurchases.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <p className="text-[9px] text-slate-500 font-medium">Auto Stock Top-up Enabled</p>
         </div>
@@ -262,7 +262,7 @@ export default function DashboardView({
             </div>
           </div>
           <span className={`text-xl font-black tracking-tight block leading-none mb-1 ${todayProfit >= 0 ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : 'text-red-500'}`}>
-            ${todayProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{todayProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <p className="text-[9px] text-slate-500 font-medium">Margins: Optimized</p>
         </div>
@@ -284,7 +284,7 @@ export default function DashboardView({
             </div>
           </div>
           <span className={`text-xl font-black tracking-tight block leading-none mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <p className="text-[9px] text-slate-500 font-medium">Control audit active</p>
         </div>
@@ -294,7 +294,7 @@ export default function DashboardView({
       <h3 className={`text-xs font-bold uppercase tracking-wider px-4 mt-3 mb-1.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
         Asset & Ledger Accounts
       </h3>
-      <div className="px-4 grid grid-cols-2 gap-3 pb-2">
+      <div className="px-4 grid grid-cols-2 lg:grid-cols-4 gap-3 pb-2">
         {/* Cash Balance */}
         <div className={`p-3 rounded-xl border relative overflow-hidden ${
           isDark ? "bg-slate-900/65 border-slate-800" : "bg-slate-50 border-slate-200/50"
@@ -309,7 +309,7 @@ export default function DashboardView({
             <span>Cash Ledger</span>
           </div>
           <div className={`text-sm font-bold mt-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${cashBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{cashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -327,7 +327,7 @@ export default function DashboardView({
             <span>Bank Account</span>
           </div>
           <div className={`text-sm font-bold mt-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${bankBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{bankBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -361,7 +361,7 @@ export default function DashboardView({
             <span>Outstandings</span>
           </div>
           <div className={`text-sm font-bold mt-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${outstandingPayments.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{outstandingPayments.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
           {!isRestricted("outstanding") && (
             <div className="text-[7.5px] text-blue-500 font-bold uppercase tracking-wider mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
@@ -379,7 +379,7 @@ export default function DashboardView({
             <span>Total Stock</span>
           </div>
           <div className={`text-sm font-bold mt-1 ${isDark ? "text-white" : "text-slate-800"}`}>
-            ${stockValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{stockValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
       </div>
@@ -518,7 +518,7 @@ export default function DashboardView({
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9.5px] font-bold text-emerald-500 font-mono leading-none block">${prod.retailPrice.toFixed(2)}</span>
+                    <span className="text-[9.5px] font-bold text-emerald-500 font-mono leading-none block">₹{prod.retailPrice.toFixed(2)}</span>
                     <span className="text-[8px] text-slate-400 font-medium block mt-0.5">{salesRates[index] || "Steady Sales"}</span>
                   </div>
                 </div>
@@ -588,7 +588,7 @@ export default function DashboardView({
                   <div className={`text-xs font-black ${
                     tx.type === "sale" ? "text-green-600" : "text-red-500"
                   }`}>
-                    {tx.type === "sale" ? "+" : "-"}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {tx.type === "sale" ? "+" : "-"}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
                   <div className="text-[9px] text-slate-400 font-bold mt-0.5">
                     {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -684,9 +684,9 @@ export default function DashboardView({
 
                 {/* Amount */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Debit/Credit Amount ($)</label>
+                  <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Debit/Credit Amount (₹)</label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-2.5 text-slate-500 font-bold">$</span>
+                    <span className="absolute left-3.5 top-2.5 text-slate-500 font-bold">₹</span>
                     <input
                       type="number"
                       step="0.01"

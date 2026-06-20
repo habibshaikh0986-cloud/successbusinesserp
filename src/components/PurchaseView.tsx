@@ -61,8 +61,8 @@ export default function PurchaseView({
     e.preventDefault();
     if (!targetProd) return;
 
-    if (userRole === "staff") {
-      alert("Permission Blocked: Staff credentials cannot post outward procurement journals.");
+    if (userRole === "general") {
+      alert("Permission Blocked: General user credentials cannot post outward procurement journals.");
       return;
     }
 
@@ -77,7 +77,7 @@ export default function PurchaseView({
 
     // Update stock levels!
     onReplenishStock(targetProd.id, purchaseQty);
-    onAddLog("PURCHASE_ORDER_POSTED", `Procured ${purchaseQty} units of SKU ${targetProd.sku} for $${totalCost.toFixed(2)}`);
+    onAddLog("PURCHASE_ORDER_POSTED", `Procured ${purchaseQty} units of SKU ${targetProd.sku} for ₹${totalCost.toFixed(2)}`);
 
     // Reset overrides
     setPurchaseQty(10);
@@ -90,8 +90,8 @@ export default function PurchaseView({
       alert("Stock levels are optimized. No reorder items found.");
       return;
     }
-    if (userRole === "staff") {
-      alert("Personnel permission insufficient for bulk restocking operations.");
+    if (userRole === "general") {
+      alert("General user permission insufficient for bulk restocking operations.");
       return;
     }
 
@@ -135,7 +135,7 @@ export default function PurchaseView({
           <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Outflow Today</span>
           <div className="mt-1.5">
             <span className={`text-base font-extrabold ${isDark ? 'text-indigo-400' : 'text-indigo-850'}`}>
-              ${totalPurchasesToday.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{totalPurchasesToday.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
           </div>
           <span className="text-[8px] text-slate-400 mt-1">Authorized Ledger Sum</span>
@@ -226,12 +226,12 @@ export default function PurchaseView({
           {/* wholesale override */}
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              Wholesale Unit Price Override ($) <span className="text-[8px] text-slate-500">(Leave blank to use defaults)</span>
+              Wholesale Unit Price Override (₹) <span className="text-[8px] text-slate-500">(Leave blank to use defaults)</span>
             </label>
             <input
               type="number"
               step="0.01"
-              placeholder={`Standard: $${targetProd ? targetProd.purchasePrice.toFixed(2) : '50.00'}`}
+              placeholder={`Standard: ₹${targetProd ? targetProd.purchasePrice.toFixed(2) : '50.00'}`}
               value={purchasePriceOverride}
               onChange={(e) => setPurchasePriceOverride(e.target.value)}
               className={`w-full py-2 px-3 text-xs rounded-xl border outline-none ${
@@ -266,7 +266,7 @@ export default function PurchaseView({
             isDark ? "bg-slate-950 text-slate-400" : "bg-slate-50 text-slate-650"
           }`}>
             <span>Total Debited Cost:</span>{" "}
-            <strong className="text-indigo-400 text-xs">${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+            <strong className="text-indigo-400 text-xs">₹{totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
           </div>
 
           <button
@@ -317,7 +317,7 @@ export default function PurchaseView({
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <span className="font-extrabold text-red-400">-${ph.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="font-extrabold text-red-400">-₹{ph.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 <span className="text-[8px] text-slate-500 font-semibold block">{new Date(ph.timestamp).toLocaleDateString()}</span>
               </div>
             </div>

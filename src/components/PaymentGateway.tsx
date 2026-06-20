@@ -77,7 +77,7 @@ export default function PaymentGateway({
   const handleInitiatePayment = async () => {
     setStep("loading");
     setLoadingText("Securing handshake with Razorpay node & generating secure keys...");
-    onAddLog("PAYMENT_INITIATE", `Initiated checkout for ${customerName} of amount $${amount} using channel ${testScenario}`);
+    onAddLog("PAYMENT_INITIATE", `Initiated checkout for ${customerName} of amount ₹${amount} using channel ${testScenario}`);
 
     // Simulation delay 1
     await new Promise((r) => setTimeout(r, 1200));
@@ -144,7 +144,7 @@ Verified Sig   : ${signature}
 Customer Name  : ${customerName}
 Mobile Number  : ${mobileNumber}
 Payment Channel: ${selectedMethod}
-Settle Amount  : $${amount.toFixed(2)}
+Settle Amount  : ₹${amount.toFixed(2)}
 Timestamp      : ${new Date().toISOString()}
 Compliance     : Certified Cryptographic Proof
 Status         : SECURE TRANSACTION SUCCESSFUL
@@ -165,7 +165,7 @@ Status         : SECURE TRANSACTION SUCCESSFUL
       `🔔 *Success ERP Payment Success Receipt*\n\n` +
       `Dear *${customerName}*,\n` +
       `We have processed and verified your payment successfully.\n\n` +
-      `💵 *Amount:* $${amount.toFixed(2)}\n` +
+      `💵 *Amount:* ₹${amount.toFixed(2)}\n` +
       `📱 *Channel:* ${selectedMethod}\n` +
       `📝 *Order ID:* ${orderId}\n` +
       `🔒 *Payment ID:* ${paymentId}\n` +
@@ -231,7 +231,7 @@ Status         : SECURE TRANSACTION SUCCESSFUL
                   Outstanding Bill Pending Collect
                 </span>
                 <span className="text-3xl font-black tracking-tight text-blue-600 block">
-                  ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  ₹{amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
@@ -307,7 +307,7 @@ Status         : SECURE TRANSACTION SUCCESSFUL
             <div className="space-y-3.5">
               <div className="text-center pb-2 border-b border-dashed border-slate-800">
                 <p className="text-[10px] text-slate-400 font-medium">Billed To: {customerName} (+{mobileNumber})</p>
-                <div className="text-xl font-bold mt-0.5 text-blue-500">${amount.toFixed(2)}</div>
+                <div className="text-xl font-bold mt-0.5 text-blue-500">₹{amount.toFixed(2)}</div>
               </div>
 
               {/* Grid of payment channels */}
@@ -408,7 +408,7 @@ Status         : SECURE TRANSACTION SUCCESSFUL
                 onClick={handleInitiatePayment}
                 className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer outline-none shadow-md shadow-blue-500/20"
               >
-                Pay ${amount.toFixed(2)}
+                Pay ₹{amount.toFixed(2)}
               </button>
             </div>
           </div>
@@ -465,7 +465,7 @@ Status         : SECURE TRANSACTION SUCCESSFUL
                 </div>
                 <div className="flex justify-between border-t border-dashed border-slate-800 pt-1.5 mt-1">
                   <span className="text-slate-500 font-bold">Paid Settle:</span>
-                  <span className="font-black text-blue-400">${amount.toFixed(2)}</span>
+                  <span className="font-black text-blue-400">₹{amount.toFixed(2)}</span>
                 </div>
               </div>
             </div>

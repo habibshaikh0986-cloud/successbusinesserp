@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "manager" | "accounting" | "staff";
+export type UserRole = "admin" | "accountant" | "general";
 
 export interface UserModel {
   uid: string;
@@ -9,6 +9,8 @@ export interface UserModel {
   isEmailVerified: boolean;
   pinCode?: string;
   isBiometricEnabled?: boolean;
+  password?: string;
+  isApproved?: boolean;
 }
 
 export type TransactionType = "sale" | "purchase" | "expense";

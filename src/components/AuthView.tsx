@@ -3,24 +3,40 @@ import {
   KeyRound, ShieldCheck, Mail, Lock, User, Phone, Check, ArrowRight, 
   RotateCcw, Fingerprint, RefreshCw, Eye, EyeOff, AlertCircle
 } from "lucide-react";
-import { UserRole } from "../types";
+import { UserRole, UserModel } from "../types";
 
 interface AuthViewProps {
-  onLoginSuccess: (role: UserRole, name: string) => void;
+  onLoginSuccess: (role: UserRole, name: string, email?: string, phone?: string) => void;
   isDark: boolean;
   onAddLog: (action: string, details: string) => void;
+  authMode?: "login" | "register" | "forgot" | "pin" | "otp" | "verifyEmail";
+  setAuthMode?: (mode: "login" | "register" | "forgot" | "pin" | "otp" | "verifyEmail") => void;
+  registeredUsers: UserModel[];
+  onRegisterUser: (user: UserModel) => void;
 }
 
-export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewProps) {
-  const [authMode, setAuthMode] = useState<"login" | "register" | "forgot" | "pin" | "otp" | "verifyEmail">("login");
+export default function AuthView({ 
+  onLoginSuccess, 
+  isDark, 
+  onAddLog,
+  authMode: controlledAuthMode,
+  setAuthMode: controlledSetAuthMode,
+  registeredUsers,
+  onRegisterUser
+}: AuthViewProps) {
+  const [localAuthMode, setLocalAuthMode] = useState<"login" | "register" | "forgot" | "pin" | "otp" | "verifyEmail">("login");
+  const authMode = controlledAuthMode !== undefined ? controlledAuthMode : localAuthMode;
+  const setAuthMode = controlledSetAuthMode !== undefined ? controlledSetAuthMode : setLocalAuthMode;
   
   // Input fields
-  const [email, setEmail] = useState("admin@success-erp.com");
-  const [password, setPassword] = useState("••••••••");
-  const [name, setName] = useState("Alexander Sterling");
-  const [phoneNumber, setPhoneNumber] = useState("+1 (555) 019-2834");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState<UserRole>("admin");
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
   // States
   const [pinValue, setPinValue] = useState<string>("");
@@ -28,6 +44,7 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
   const [biometricPrompt, setBiometricPrompt] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [otpPurpose, setOtpPurpose] = useState<"login" | "register">("login");
 
   const triggerNotification = (message: string) => {
     setInfoMessage(message);
@@ -36,17 +53,60 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
 
   const handleClassicLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddLog("LOGIN_SUCCESS", `Logged in via general password module as ${role.toUpperCase()}`);
-    onLoginSuccess(role, name);
+
+    // Look up user accounts in our registered database base
+    const matchedUser = registeredUsers.find(
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+    );
+
+    if (!matchedUser) {
+      triggerNotification("❌ This Email Address is not registered. Click 'Register Credentials' to signup!");
+      onAddLog("LOGIN_FAILED", `Auth attempt failed: ${email} is not in directory`);
+      return;
+    }
+
+    if (matchedUser.password !== password) {
+      triggerNotification("❌ Invalid password specified! Please audit correct override credentials.");
+      onAddLog("LOGIN_FAILED", `Credentials check failed for ${email}`);
+      return;
+    }
+
+    if (!matchedUser.isApproved) {
+      triggerNotification("⚠️ Account PENDING Admin Approval! Your account must be approved by the Admin before logging in.");
+      onAddLog("LOGIN_BLOCKED", `Authentication blocked for unapproved login request: ${email}`);
+      return;
+    }
+
+    // Synchronize selected fields with matching profile attributes
+    setRole(matchedUser.role);
+    setName(matchedUser.name);
+    setPhoneNumber(matchedUser.phoneNumber || "");
+
+    onAddLog("LOGIN_INITIATED", `Classic login password approved. Compulsory OTP validation triggered for user role: ${matchedUser.role.toUpperCase()}`);
+    setOtpPurpose("login");
+    triggerOtpSend();
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddLog("USER_REGISTERED", `New profile request submitted for ${name} (${role})`);
-    
-    // Switch to Email Verification flow
-    setAuthMode("verifyEmail");
-    triggerNotification("✉️ Verification link broadcasted to info server!");
+
+    const existingUser = registeredUsers.find(
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+    );
+
+    if (existingUser) {
+      triggerNotification("❌ Email already exists! Try another email or recover password.");
+      return;
+    }
+
+    if (!registerPassword || registerPassword.length < 4) {
+      triggerNotification("❌ Password must be at least 4 characters long!");
+      return;
+    }
+
+    onAddLog("USER_REGISTERED_INITIATED", `Profile registration request received for ${name} (${role}). Compulsory OTP validation triggered`);
+    setOtpPurpose("register");
+    triggerOtpSend();
   };
 
   const handlePinPress = (num: string) => {
@@ -56,8 +116,20 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
 
     if (newVal === "1234") {
       setTimeout(() => {
-        onAddLog("PIN_AUTH_SUCCESS", "Device unlocked via clean 4-digit security PIN");
-        onLoginSuccess(role, name);
+        // By default PIN is only allowed if there's an approved admin or accountant. We'll find one to bypass login
+        const defaultApprovedUser = registeredUsers.find(u => u.isApproved);
+        if (defaultApprovedUser) {
+          setRole(defaultApprovedUser.role);
+          setName(defaultApprovedUser.name);
+          setEmail(defaultApprovedUser.email);
+          setPhoneNumber(defaultApprovedUser.phoneNumber || "");
+          
+          onAddLog("PIN_AUTH_GRANTED", `Secure PIN matched. Logging in bypass as ${defaultApprovedUser.name}`);
+          setOtpPurpose("login");
+          triggerOtpSend();
+        } else {
+          triggerNotification("❌ No active verified profiles in database directory! Please register a new account on the Signup tab.");
+        }
         setPinValue("");
       }, 300);
     } else if (newVal.length === 4) {
@@ -71,9 +143,45 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
   const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (otpValue === "4899") {
-      onAddLog("OTP_AUTH_SUCCESS", "Multifactor authentication approved via telecommunication secure hash.");
-      onLoginSuccess(role, name);
-      setOtpValue("");
+      if (otpPurpose === "register") {
+        onAddLog("USER_OTP_REGISTER_SUCCESS", `Signup OTP verification approved for ${name} [${role.toUpperCase()}]`);
+        
+        // Admin registrations are auto-approved so they can log in right away and approve others!
+        const isApproved = role === "admin";
+        
+        const newUser: UserModel = {
+          uid: `user-${Date.now()}`,
+          email: email.trim(),
+          name: name.trim(),
+          role,
+          phoneNumber: phoneNumber.trim(),
+          isEmailVerified: true,
+          password: registerPassword,
+          isApproved
+        };
+
+        onRegisterUser(newUser);
+
+        if (isApproved) {
+          triggerNotification(`🎉 Admin Account Successfully Created! Welcoming master session...`);
+          setTimeout(() => {
+            onLoginSuccess(role, name, email, phoneNumber);
+            setOtpValue("");
+          }, 1500);
+        } else {
+          triggerNotification(`📝 Signup request submitted! Awaiting Admin Approval to log in. Please contact Admin.`);
+          setTimeout(() => {
+            setAuthMode("login");
+            setOtpValue("");
+            // Clear passwords
+            setRegisterPassword("");
+          }, 2500);
+        }
+      } else {
+        onAddLog("OTP_AUTH_SUCCESS", `Multifactor login approved for ${name} [${role.toUpperCase()}] via secure OTP`);
+        onLoginSuccess(role, name, email, phoneNumber);
+        setOtpValue("");
+      }
     } else {
       triggerNotification("❌ Invalid security token checksum! Please audit correct code '4899'.");
       setOtpValue("");
@@ -83,10 +191,10 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
   const triggerOtpSend = () => {
     setOtpSent(true);
     setAuthMode("otp");
-    onAddLog("OTP_DISPATCHED", "Secure SMS OTP challenge token dispatched to auth server registry");
+    onAddLog("OTP_DISPATCHED", "Secure SMS OTP challenge token dispatched to register phone");
     setTimeout(() => {
       triggerNotification("📲 SUCCESS ERP CODE: Your secure sign-in verification code is [ 4899 ]");
-    }, 1500);
+    }, 1000);
   };
 
   const triggerBiometricAuth = () => {
@@ -96,8 +204,9 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
 
   const completeBiometricAuth = () => {
     setBiometricPrompt(false);
-    onAddLog("BIOMETRICS_MATCH", "Dermal fingerprint pattern validated successfully");
-    onLoginSuccess(role, name);
+    onAddLog("BIOMETRICS_MATCH", "Biometric pattern verified. Launching compulsory OTP security challenge");
+    setOtpPurpose("login");
+    triggerOtpSend();
   };
 
   return (
@@ -108,7 +217,7 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
           <ShieldCheck className="w-8 h-8" />
         </div>
         <h1 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-          Success Business Accounting ERP
+          Success Business
         </h1>
         <p className="text-[11px] text-slate-500 font-medium">
           M3 Compliant Zero-Knowledge Security Vault
@@ -125,6 +234,44 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
         )}
       </div>
 
+      {/* Centered Segmented Control / Tabs Switcher */}
+      <div className="px-5 mt-4 mb-2 shrink-0">
+        <div className={`p-1.5 rounded-2xl flex items-center ${
+          isDark ? "bg-slate-900 border border-slate-800" : "bg-slate-100 border border-slate-200"
+        }`}>
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMode("login");
+              onAddLog("AUTH_MODE_SHIFT", "Switched gateway state to LOGIN interface form");
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              authMode === "login" || authMode === "pin" || authMode === "otp" || authMode === "forgot"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/10 scale-100 font-extrabold"
+                : (isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900")
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-sky-300" />
+            <span>Login Vault</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMode("register");
+              onAddLog("AUTH_MODE_SHIFT", "Switched gateway state to NEW CREDENTIAL REGISTER form");
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              authMode === "register" || authMode === "verifyEmail"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/10 scale-100 font-extrabold"
+                : (isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900")
+            }`}
+          >
+            <User className="w-4 h-4 text-sky-300" />
+            <span>Signup</span>
+          </button>
+        </div>
+      </div>
+
       {/* RENDER ACTIVE SCREEN CONTROLLER */}
       <div className="flex-1 px-5 py-4">
         {/* LOGIN FORM SCREEN */}
@@ -132,25 +279,25 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
           <form onSubmit={handleClassicLogin} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Account Role Selection</label>
-              <div className="grid grid-cols-4 gap-1">
-                {(["admin", "manager", "accounting", "staff"] as const).map((roleType) => (
+              <div className="grid grid-cols-3 gap-1">
+                {(["admin", "accountant", "general"] as const).map((roleType) => (
                   <button
                     key={roleType}
                     type="button"
                     onClick={() => {
                       setRole(roleType);
-                      if (roleType === "admin") {
-                        setName("Alexander Sterling");
-                        setEmail("admin@success-erp.com");
-                      } else if (roleType === "manager") {
-                        setName("Sarah Jenkins");
-                        setEmail("sarah.j@success-erp.com");
-                      } else if (roleType === "accounting") {
-                        setName("Alex Wong");
-                        setEmail("alex.wong@success-erp.com");
-                      } else {
-                        setName("Marcus Lane");
-                        setEmail("marcus.lane@success-erp.com");
+                      // Only prefill mock credentials as an onboarding sandbox helper if inputs are current empty
+                      if (!email && !password) {
+                        if (roleType === "admin") {
+                          setName("Alexander Sterling");
+                          setEmail("admin@success-erp.com");
+                        } else if (roleType === "accountant") {
+                          setName("Alex Wong");
+                          setEmail("alex.wong@success-erp.com");
+                        } else {
+                          setName("Marcus Lane");
+                          setEmail("general.user@success-erp.com");
+                        }
                       }
                     }}
                     className={`py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all tracking-wider ${
@@ -159,7 +306,7 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
                         : (isDark ? "bg-slate-800/60 border border-slate-700/50 text-slate-400" : "bg-slate-100 border border-slate-200 text-slate-600")
                     }`}
                   >
-                    {roleType === "accounting" ? "ACCT" : roleType}
+                    {roleType === "accountant" ? "ACCT" : roleType}
                   </button>
                 ))}
               </div>
@@ -310,9 +457,8 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
                 }`}
               >
                 <option value="admin">Administrator</option>
-                <option value="manager">Wholesales Manager</option>
-                <option value="accounting">Auditor / Accountant</option>
-                <option value="staff">Floor Staff / Operator</option>
+                <option value="accountant">Accountant</option>
+                <option value="general">General</option>
               </select>
             </div>
 
@@ -346,6 +492,30 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
                   }`}
                   placeholder="employee@success-erp.com"
                 />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Set Account Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  required
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className={`w-full py-2.5 pl-10 pr-10 text-xs rounded-xl border outline-none ${
+                    isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  }`}
+                  placeholder="Set your account password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 outline-none cursor-pointer"
+                >
+                  {showRegisterPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
@@ -490,10 +660,10 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
         {authMode === "otp" && (
           <form onSubmit={handleOtpSubmit} className="space-y-4 text-center">
             <h2 className={`text-base font-extrabold ${isDark ? "text-slate-100" : "text-slate-800"}`}>
-              SMS Multi-Factor Check
+              {otpPurpose === "register" ? "Signup Verify OTP" : "Login Verify OTP"}
             </h2>
             <p className="text-[11px] text-slate-400 -mt-2.5 leading-tight">
-              A temporary secure passkey was fired. Enter code to unlock financial accounting ledger.
+              A compulsory security passkey was fired. Enter code to authenticate.
             </p>
 
             <div className="space-y-3.5 py-2">
@@ -554,8 +724,8 @@ export default function AuthView({ onLoginSuccess, isDark, onAddLog }: AuthViewP
             <div className="pt-2">
               <button
                 onClick={() => {
-                  onAddLog("EMAIL_VERIFIED_BYPASS", `${name} logged in after email verification status verified`);
-                  onLoginSuccess(role, name);
+                  onAddLog("EMAIL_VERIFIED_BYPASS", `${name || "Verified Client"} logged in after email verification status verified`);
+                  onLoginSuccess(role, name, email, phoneNumber);
                 }}
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
               >

@@ -72,7 +72,7 @@ export default function SalesView({
       paymentMethod: selectedPayment
     });
 
-    onAddLog("SALE_POSTED", `Sold ${salesQty} units of ${targetProd.sku} generating $${totalBill.toFixed(2)} receivable`);
+    onAddLog("SALE_POSTED", `Sold ${salesQty} units of ${targetProd.sku} generating ₹${totalBill.toFixed(2)} receivable`);
     
     // Reset quantities
     setSalesQty(1);
@@ -102,11 +102,11 @@ export default function SalesView({
             <TrendingUp className="w-4 h-4" />
             <span className="text-[10px] font-black uppercase tracking-wider">Enterprise Performance</span>
           </div>
-          <span className="text-[9px] font-mono font-medium text-slate-400">TARGET: $25k</span>
+          <span className="text-[9px] font-mono font-medium text-slate-400">TARGET: ₹25k</span>
         </div>
         <div className="flex items-baseline gap-1.5">
           <span className={`text-xl font-black ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>
-            ${calculateTotalSalesToday().toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{calculateTotalSalesToday().toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
           <span className="text-[10px] text-slate-400">Total Cleared</span>
         </div>
@@ -145,7 +145,7 @@ export default function SalesView({
             >
               {products.map(p => (
                 <option key={p.id} value={p.id}>
-                  {p.name} (${p.retailPrice.toFixed(2)} - Stock: {p.currentStock})
+                  {p.name} (₹{p.retailPrice.toFixed(2)} - Stock: {p.currentStock})
                 </option>
               ))}
             </select>
@@ -222,25 +222,25 @@ export default function SalesView({
           <div className={`p-4 rounded-2xl space-y-1.5 font-mono text-[10px] ${
             isDark ? "bg-slate-950 text-slate-400" : "bg-slate-50 text-slate-600"
           }`}>
-            <div className="flex justify-between">
+             <div className="flex justify-between">
               <span>Retail Base Settle:</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-red-500">
               <span>Discounts applied:</span>
-              <span>-${discountAmount.toFixed(2)}</span>
+              <span>-₹{discountAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Taxable Subtotal:</span>
-              <span>${taxableAmount.toFixed(2)}</span>
+              <span>₹{taxableAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-blue-400">
               <span>Sales Tax ({taxPercent}%):</span>
-              <span>+${taxAmount.toFixed(2)}</span>
+              <span>+₹{taxAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between border-t border-dashed border-slate-850 pt-2 font-bold text-xs">
               <span className={isDark ? "text-slate-200" : "text-slate-800"}>TOTAL ACCOUNT DUE:</span>
-              <span className="text-emerald-500">${totalBill.toFixed(2)}</span>
+              <span className="text-emerald-500">₹{totalBill.toFixed(2)}</span>
             </div>
           </div>
 
@@ -316,7 +316,7 @@ export default function SalesView({
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <span className="font-extrabold text-emerald-500 block">+${sh.amount.toFixed(2)}</span>
+                <span className="font-extrabold text-emerald-500 block">+₹{sh.amount.toFixed(2)}</span>
                 <button
                   onClick={() => setShowInvoicePrint(sh)}
                   className="text-[9px] text-blue-500 hover:underline cursor-pointer flex items-center gap-0.5 justify-end"
@@ -354,7 +354,7 @@ export default function SalesView({
 
             <div className="flex justify-between font-bold text-sm mb-5 text-emerald-500">
               <span>NET RECEIVED:</span>
-              <span>${showInvoicePrint.amount.toFixed(2)}</span>
+              <span>₹{showInvoicePrint.amount.toFixed(2)}</span>
             </div>
 
             <div className="flex gap-2">

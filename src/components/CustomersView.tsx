@@ -19,135 +19,16 @@ interface CustomersViewProps {
 }
 
 // Initial Mock Customers
-const initialCustomersList: CustomerModel[] = [
-  {
-    id: "CUST-2026-001",
-    name: "Rohan Sharma",
-    mobile: "9876543210",
-    whatsApp: "9876543210",
-    email: "rohan@sharmasteel.com",
-    gstNo: "27AAAAA1111A1Z1",
-    panNo: "ABCDE1234F",
-    aadhaarNo: "1234-5678-9012",
-    businessName: "Sharma Steel Industries",
-    businessCategory: "Manufacturing & Metals",
-    address: "402 Prime Corporate Tower, LBS Marg, Ghatkopar",
-    city: "Mumbai",
-    state: "Maharashtra",
-    country: "India",
-    pinCode: "400086",
-    openingBalance: 1000,
-    creditLimit: 10000,
-    paymentTerms: "Net 30",
-    status: "Active",
-    customerType: "Wholesale",
-    profilePhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
-    gstCertificate: "gst_cert.pdf",
-    notes: "VIP wholesale partner since 2024. Prompt payments via UPI.",
-    createdAt: "2026-01-15T10:00:00Z"
-  },
-  {
-    id: "CUST-2026-002",
-    name: "Priya Patel",
-    mobile: "9123456789",
-    whatsApp: "9123456789",
-    email: "priya@pixelelectronics.co",
-    gstNo: "24BBBBB2222B2Z2",
-    panNo: "FGHIJ5678K",
-    aadhaarNo: "2345-6789-0123",
-    businessName: "Pixel Electronics Ltd",
-    businessCategory: "Consumer Electronics",
-    address: "SF-8 Alpha Infotech Park, SG Highway",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    country: "India",
-    pinCode: "380054",
-    openingBalance: 5000,
-    creditLimit: 15000,
-    paymentTerms: "Net 15",
-    status: "Active",
-    customerType: "Distributor",
-    profilePhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
-    notes: "Requires quick delivery. Dispatches with high-priority freight lanes.",
-    createdAt: "2026-02-10T14:30:00Z"
-  },
-  {
-    id: "CUST-2026-003",
-    name: "Anil Kumar",
-    mobile: "8888777766",
-    whatsApp: "8888777766",
-    email: "anil@kumarandsonstrade.com",
-    gstNo: "07CCCCC3333C3Z3",
-    panNo: "LMNOP9012Q",
-    businessName: "Kumar & Sons Trade",
-    businessCategory: "Hardware & Retail Supplies",
-    address: "WZ-102 Katra Neel, Chandni Chowk",
-    city: "Delhi",
-    state: "Delhi",
-    country: "India",
-    pinCode: "110006",
-    openingBalance: 3200,
-    creditLimit: 5000,
-    paymentTerms: "Due on Receipt",
-    status: "Blocked",
-    customerType: "Dealer",
-    notes: "Overdue payments. Repeated credit margin extensions refused by Management.",
-    createdAt: "2026-03-01T11:15:00Z"
-  },
-  {
-    id: "CUST-2026-004",
-    name: "Vikram Singh",
-    mobile: "7776665554",
-    whatsApp: "7776665554",
-    email: "vikram@rajasthansand.in",
-    gstNo: "08DDDDD4444D4Z4",
-    panNo: "RSTUV3456W",
-    businessName: "Rajasthan Sand Quarrying",
-    businessCategory: "Construction Supplies",
-    city: "Jaipur",
-    state: "Rajasthan",
-    country: "India",
-    pinCode: "302015",
-    openingBalance: 0,
-    creditLimit: 20000,
-    paymentTerms: "Cash on Delivery",
-    status: "Active",
-    customerType: "Retail",
-    notes: "Cash transactions dominant. Rarely utilizes credit line bounds.",
-    createdAt: "2026-04-18T09:20:00Z"
-  }
-];
+const initialCustomersList: CustomerModel[] = [];
 
 // Initial Ledger Entries
-const initialLedgerEntries: CustomerLedgerEntry[] = [
-  // Rohan Sharma
-  { id: "L-1", customerId: "CUST-2026-001", date: "2026-06-01", description: "Opening Balance Setup", type: "opening", debit: 1000, credit: 0, balance: 1000 },
-  { id: "L-2", customerId: "CUST-2026-001", date: "2026-06-05", invoiceNo: "INV-2026-101", description: "Sale - Metal Angles & Steel Pipes", type: "sale", debit: 4000, credit: 0, balance: 5000 },
-  { id: "L-3", customerId: "CUST-2026-001", date: "2026-06-10", description: "Payment received via GPay UPI", type: "payment", debit: 0, credit: 1500, balance: 3500 },
-  { id: "L-4", customerId: "CUST-2026-001", date: "2026-06-15", invoiceNo: "INV-2026-122", description: "Sale - Industrial Brass Fittings", type: "sale", debit: 2000, credit: 0, balance: 5500 },
-  { id: "L-5", customerId: "CUST-2026-001", date: "2026-06-18", description: "Payment received Bank NEFT", type: "payment", debit: 0, credit: 1000, balance: 4500 },
-  // Priya Patel
-  { id: "L-6", customerId: "CUST-2026-002", date: "2026-06-02", description: "Opening Balance Setup", type: "opening", debit: 5000, credit: 0, balance: 5000 },
-  { id: "L-7", customerId: "CUST-2026-002", date: "2026-06-08", invoiceNo: "INV-2026-105", description: "Sale - Fibre Optic Rolls 500m", type: "sale", debit: 8000, credit: 0, balance: 13000 },
-  { id: "L-8", customerId: "CUST-2026-002", date: "2026-06-12", description: "Payment Received - HDFC Bank Transfer", type: "payment", debit: 0, credit: 1000, balance: 12000 },
-  // Anil Kumar
-  { id: "L-9", customerId: "CUST-2026-003", date: "2026-06-03", description: "Opening Balance Setup", type: "opening", debit: 3200, credit: 0, balance: 3200 },
-  { id: "L-10", customerId: "CUST-2026-003", date: "2026-06-09", invoiceNo: "INV-2026-112", description: "Sale - Pressure Valve Kit XL", type: "sale", debit: 5000, credit: 0, balance: 8200 },
-];
+const initialLedgerEntries: CustomerLedgerEntry[] = [];
 
 // Initial Communications
-const initialCommunicationsList: CustomerCommunication[] = [
-  { id: "C-1", customerId: "CUST-2026-001", date: "2026-06-10T16:00:00Z", type: "WhatsApp", subject: "Payment Thank You Broadcast", details: "Dispatched automated thank-you receipt of $1,500.00." },
-  { id: "C-2", customerId: "CUST-2026-001", date: "2026-06-15T11:00:00Z", type: "SMS", subject: "Invoice Dispatch Status", details: "Dispatched digital Invoice INV-2026-122 download link." },
-  { id: "C-3", customerId: "CUST-2026-003", date: "2026-06-16T15:20:00Z", type: "Call", subject: "Overdue Credit Line Reminder", details: "Outbound agent call regarding $8,200.00 ledger balance. Customer asked for grace extension." }
-];
+const initialCommunicationsList: CustomerCommunication[] = [];
 
 // Initial Notifications / Alerts
-const initialNotificationsList: CustomerNotification[] = [
-  { id: "N-1", customerId: "CUST-2026-003", type: "credit", title: "Credit Limit Exceeded", message: "Kumar & Sons Trade owe $8,200 (limit is $5,000). Action Needed.", date: "2026-06-18T12:00:00Z", isRead: false },
-  { id: "N-2", customerId: "CUST-2026-001", type: "birthday", title: "Rohan Sharma's Birthday", message: "Wish Rohan Sharma today! Send customized WhatsApp offer code.", date: "2026-06-20T08:00:00Z", isRead: false },
-  { id: "N-3", customerId: "CUST-2026-002", type: "due", title: "Payment Due In 2 Days", message: "Priya Patel's invoice of $12,000 is maturing. Auto reminder queued.", date: "2026-06-19T10:00:00Z", isRead: false }
-];
+const initialNotificationsList: CustomerNotification[] = [];
 
 export default function CustomersView({ isDark, onAddLog, userRole, userName }: CustomersViewProps) {
   // --- Core States ---
@@ -233,12 +114,12 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
   };
 
   // Safe checks for Role-based Permissions
-  // Admin / Manager / Accountant can manage payments
-  const canManageFinancials = userRole === "admin" || userRole === "manager" || userRole === "accounting";
-  // Admin / Manager can block / change status
-  const canAlterStatus = userRole === "admin" || userRole === "manager";
-  // Read Only Checks for staff on high sensitive actions
-  const isStaff = userRole === "staff";
+  // Admin / Accountant can manage payments
+  const canManageFinancials = userRole === "admin" || userRole === "accountant";
+  // Admin / Accountant can block / change status
+  const canAlterStatus = userRole === "admin" || userRole === "accountant";
+  // Read Only Checks for general user on high sensitive actions
+  const isStaff = userRole === "general";
 
   // Detailed computations for Dashboard Cards
   const dashboardKPIs = useMemo(() => {
@@ -803,10 +684,10 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
                         ? "text-red-500 animate-pulse" 
                         : "text-rose-500"
                     }`}>
-                      ${getCustomerOutstanding(selectedCustomer.id).toFixed(2)}
+                      ₹{getCustomerOutstanding(selectedCustomer.id).toFixed(2)}
                     </strong>
                     <span className="text-[9px] text-slate-500 font-medium block mt-0.5">
-                      Credit Limit: ${selectedCustomer.creditLimit.toFixed(2)} • {selectedCustomer.paymentTerms}
+                      Credit Limit: ₹{selectedCustomer.creditLimit.toFixed(2)} • {selectedCustomer.paymentTerms}
                     </span>
                   </div>
                 </div>
@@ -918,13 +799,13 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
                               {rec.invoiceNo && <span className="text-[9px] font-mono py-0.5 px-1 bg-slate-800 text-slate-300 rounded uppercase">{rec.invoiceNo}</span>}
                             </td>
                             <td className="py-2.5 text-right font-mono text-rose-400 font-bold">
-                              {rec.debit > 0 ? `$${rec.debit.toFixed(2)}` : "—"}
+                              {rec.debit > 0 ? `₹${rec.debit.toFixed(2)}` : "—"}
                             </td>
                             <td className="py-2.5 text-right font-mono text-emerald-400 font-bold">
-                              {rec.credit > 0 ? `$${rec.credit.toFixed(2)}` : "—"}
+                              {rec.credit > 0 ? `₹${rec.credit.toFixed(2)}` : "—"}
                             </td>
                             <td className="py-2.5 text-right font-mono text-slate-300 font-bold">
-                              ${rec.runningBalance.toFixed(2)}
+                              ₹{rec.runningBalance.toFixed(2)}
                             </td>
                           </tr>
                         ))
@@ -1094,9 +975,9 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
                     }`}
                   >
                     <option value={0}>Any Outstanding</option>
-                    <option value={1000}> outstanding &gt; $1,000</option>
-                    <option value={5000}> outstanding &gt; $5,000</option>
-                    <option value={10000}> outstanding &gt; $10,000</option>
+                    <option value={1000}> outstanding &gt; ₹1,000</option>
+                    <option value={5000}> outstanding &gt; ₹5,000</option>
+                    <option value={10000}> outstanding &gt; ₹10,000</option>
                   </select>
                 </div>
               </div>
@@ -1154,9 +1035,9 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
 
                         <div className="text-right">
                           <strong className={`text-sm block font-black ${overLimit ? "text-red-500 animate-bounce" : (balance > 0 ? "text-rose-500" : "text-slate-400")}`}>
-                            ${balance.toFixed(2)}
+                            ₹{balance.toFixed(2)}
                           </strong>
-                          <span className="text-[8.5px] block text-slate-500 font-mono uppercase">LMT: ${cust.creditLimit}</span>
+                          <span className="text-[8.5px] block text-slate-500 font-mono uppercase">LMT: ₹{cust.creditLimit}</span>
                         </div>
                       </div>
                     );
@@ -1380,7 +1261,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
 
               {/* Financial: Opening Balance */}
               <div className="space-y-1">
-                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Opening Balance Outstanding ($)</label>
+                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Opening Balance Outstanding (₹)</label>
                 <input
                   type="number"
                   placeholder="0.00"
@@ -1394,7 +1275,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
 
               {/* Financial: Credit Limit Constraint */}
               <div className="space-y-1">
-                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Credit Exposure Limit Constraint ($)</label>
+                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Credit Exposure Limit Constraint (₹)</label>
                 <input
                   type="number"
                   placeholder="5000"
@@ -1523,7 +1404,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
                     const outstanding = getCustomerOutstanding(c.id);
                     return (
                       <option key={c.id} value={c.id}>
-                        {c.name} ({c.businessName || "Individual"}) - Outstanding Due: ${outstanding.toFixed(2)}
+                        {c.name} ({c.businessName || "Individual"}) - Outstanding Due: ₹{outstanding.toFixed(2)}
                       </option>
                     );
                   })}
@@ -1532,7 +1413,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
 
               {/* Payment Amount */}
               <div className="space-y-1">
-                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Payment Received Amount ($)</label>
+                <label className="text-[9.5px] font-bold uppercase text-slate-450 block">Payment Received Amount (₹)</label>
                 <input
                   type="number"
                   step="any"
@@ -1659,7 +1540,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
                       <div className="flex justify-between items-center mb-1 text-slate-350">
                         <span className="font-semibold">{c.name}</span>
                         <span className={limitWarn ? "text-red-500 font-bold" : "text-slate-200 font-bold"}>
-                          ${outst.toFixed(2)} <span className="text-[10px] text-slate-500 font-mono">/ {c.creditLimit} limit</span>
+                          ₹{outst.toFixed(2)} <span className="text-[10px] text-slate-500 font-mono">/ {c.creditLimit} limit</span>
                         </span>
                       </div>
                       <div className="w-full bg-slate-800/50 h-2 rounded-full overflow-hidden">
@@ -1688,7 +1569,7 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
               <div className="space-y-2">
                 <div className="flex justify-between p-2 rounded-xl bg-slate-500/5 items-center">
                   <span className="text-xs text-slate-405">Highest Outstanding limit</span>
-                  <strong className="text-xs text-rose-500">$12,000.00 (Priya Patel)</strong>
+                  <strong className="text-xs text-rose-500">₹12,000.00 (Priya Patel)</strong>
                 </div>
 
                 <div className="flex justify-between p-2 rounded-xl bg-slate-500/5 items-center">

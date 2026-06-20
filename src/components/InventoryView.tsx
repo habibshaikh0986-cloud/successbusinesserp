@@ -47,8 +47,8 @@ export default function InventoryView({
       return;
     }
 
-    if (userRole === "staff") {
-      alert("Access Blocked: Personnel permissions are restricted from writing new SKU listings.");
+    if (userRole === "general") {
+      alert("Access Blocked: General users are restricted from writing new SKU listings.");
       return;
     }
 
@@ -77,8 +77,8 @@ export default function InventoryView({
   };
 
   const handleEditPricePrompt = (prod: ProductModel) => {
-    if (userRole === "staff" || userRole === "accounting") {
-      alert("Permission Blocked: Only Administrator or Manager details override pricing metrics!");
+    if (userRole === "general" || userRole === "accountant") {
+      alert("Permission Blocked: Only Administrator can override pricing metrics!");
       return;
     }
     const newPrice = prompt(`Enter new retail rate for ${prod.name}:`, prod.retailPrice.toString());
@@ -122,8 +122,8 @@ export default function InventoryView({
         </div>
         <button
           onClick={() => {
-            if (userRole === "staff") {
-              alert("Personnel credentials cannot define new ERP items.");
+            if (userRole === "general") {
+              alert("General users cannot define new ERP items.");
               return;
             }
             setShowAddForm(true);
@@ -199,14 +199,14 @@ export default function InventoryView({
                 <div>
                   <span className="text-[8.5px] uppercase text-slate-500 font-bold block">Wholesale Base</span>
                   <span className={`font-mono font-bold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
-                    ${prod.purchasePrice.toFixed(2)}
+                    ₹{prod.purchasePrice.toFixed(2)}
                   </span>
                 </div>
                 <div>
                   <span className="text-[8.5px] uppercase text-slate-500 font-bold block">Retail Price Matrix</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-purple-500">${prod.retailPrice.toFixed(2)}</span>
-                    {userRole !== "staff" && userRole !== "accounting" && (
+                    <span className="font-mono font-bold text-purple-500">₹{prod.retailPrice.toFixed(2)}</span>
+                    {userRole !== "general" && userRole !== "accountant" && (
                       <button
                         onClick={() => handleEditPricePrompt(prod)}
                         className="text-[9px] text-slate-400 hover:text-purple-400 hover:underline cursor-pointer flex items-center gap-0.5"
@@ -352,7 +352,7 @@ export default function InventoryView({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wholesale Unit Buy ($)</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wholesale Unit Buy (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -367,7 +367,7 @@ export default function InventoryView({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Retail Unit Sell ($)</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Retail Unit Sell (₹)</label>
                   <input
                     type="number"
                     step="0.01"

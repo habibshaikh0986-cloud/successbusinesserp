@@ -51,7 +51,7 @@ export default function ReportsView({
   const handleExportJournalCSV = () => {
     let csvContent = "Transaction ID,Title,Classification,Category,Debit/Credit Sum,Payment Mode,Logged Timestamp,Authorized Auditor\n";
     transactions.forEach((tx) => {
-      const line = `"${tx.id}","${tx.title.replace(/"/g, '""')}","${tx.type}","${tx.category}",$${tx.amount.toFixed(2)},"${tx.paymentMethod}","${tx.timestamp}","${tx.loggedBy.replace(/"/g, '""')}"\n`;
+      const line = `"${tx.id}","${tx.title.replace(/"/g, '""')}","${tx.type}","${tx.category}",₹${tx.amount.toFixed(2)},"${tx.paymentMethod}","${tx.timestamp}","${tx.loggedBy.replace(/"/g, '""')}"\n`;
       csvContent += line;
     });
 
@@ -79,11 +79,11 @@ Status Code     : SECURED COMPLIANT SYSTEM OK
 ------------------------------------------------------
 FINANCIAL STATEMENTS METRIC GROUPINGS
 ------------------------------------------------------
-Gross Inward Sales  : $${totalSales.toFixed(2)}
-Wholesale Purchase  : $${totalPurchases.toFixed(2)}
-Operational Expense : $${totalExpenses.toFixed(2)}
+Gross Inward Sales  : ₹${totalSales.toFixed(2)}
+Wholesale Purchase  : ₹${totalPurchases.toFixed(2)}
+Operational Expense : ₹${totalExpenses.toFixed(2)}
 ------------------------------------------------------
-Net Operating Profit: $${netEarningsVal.toFixed(2)}
+Net Operating Profit: ₹${netEarningsVal.toFixed(2)}
 Margin Yield Ratio  : ${marginPercentage.toFixed(1)}%
 ------------------------------------------------------
 WAREHOUSE PHYSICAL LEDGER VALUES
@@ -124,7 +124,7 @@ Compliance standard: SOX Section 404 Verified
             <div key={cat} className="space-y-1">
               <div className="flex justify-between items-center text-[9.5px]">
                 <span className="font-semibold text-slate-400 font-mono">{cat} Ledger Group</span>
-                <span className="font-bold text-teal-500 font-mono">${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                <span className="font-bold text-teal-500 font-mono">₹{val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
               <div className="w-full bg-slate-800/10 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div 
@@ -189,7 +189,7 @@ Compliance standard: SOX Section 404 Verified
           <div className="space-y-1">
             <span className="text-[8.5px] font-bold text-slate-500 uppercase block">Outward Sales</span>
             <span className={`text-sm font-black font-mono block ${isDark ? "text-slate-100" : "text-slate-805"}`}>
-              ${totalSales.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
             <span className="text-[8px] text-green-500 font-bold block flex items-center gap-0.5">
               <TrendingUp className="w-2.5 h-2.5" /> Direct receivables
@@ -199,7 +199,7 @@ Compliance standard: SOX Section 404 Verified
           <div className="space-y-1">
             <span className="text-[8.5px] font-bold text-slate-500 uppercase block">Total Buy Procure</span>
             <span className={`text-sm font-black font-mono block ${isDark ? "text-slate-110" : "text-slate-800"}`}>
-              ${totalPurchases.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{totalPurchases.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
             <span className="text-[8px] text-slate-400 font-bold block">Internal debits</span>
           </div>
@@ -207,7 +207,7 @@ Compliance standard: SOX Section 404 Verified
           <div className="space-y-1">
             <span className="text-[8.5px] font-bold text-slate-500 uppercase block">Operating Expenses</span>
             <span className={`text-sm font-black font-mono block ${isDark ? "text-slate-100" : "text-slate-800"}`}>
-              ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
             <span className="text-[8px] text-slate-400 font-bold block">Overhead/Fees</span>
           </div>
@@ -215,7 +215,7 @@ Compliance standard: SOX Section 404 Verified
           <div className="space-y-1">
             <span className="text-[8.5px] font-bold text-slate-500 uppercase block">Net Yield Surplus</span>
             <span className={`text-sm font-black font-mono block ${netEarningsVal >= 0 ? "text-teal-500" : "text-red-500"}`}>
-              ${netEarningsVal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              ₹{netEarningsVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
             <span className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded-full inline-block mt-0.5 leading-none ${
               netEarningsVal >= 0 ? "bg-teal-500/10 text-teal-500" : "bg-red-500/10 text-red-500"
