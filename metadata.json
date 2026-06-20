@@ -1,0 +1,6 @@
+{
+  "name": "Success Business Accounting ERP",
+  "description": "Production Ready Mobile Accounting & Inventory Management Suite with Material Design 3, real-time analytics, inventory charts, role-based controls, security PIN/biometric simulation, and architecture code explorer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
