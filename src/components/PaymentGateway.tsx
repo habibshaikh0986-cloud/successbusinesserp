@@ -31,8 +31,8 @@ export default function PaymentGateway({
   onAddLog
 }: PaymentGatewayProps) {
   // Input fields
-  const [customerName, setCustomerName] = useState("Habib Shaikh");
-  const [mobileNumber, setMobileNumber] = useState("9819283746");
+  const [customerName, setCustomerName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("UPI");
   const [testScenario, setTestScenario] = useState<"success" | "failed" | "cancelled" | "network_error">("success");
 
@@ -46,9 +46,9 @@ export default function PaymentGateway({
   const [loadingText, setLoadingText] = useState("");
 
   // Card details mock helper
-  const [cardNumber, setCardNumber] = useState("4111 2222 3333 4444");
-  const [cardExpiry, setCardExpiry] = useState("09/29");
-  const [cardCVV, setCardCVV] = useState("123");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCVV, setCardCVV] = useState("");
 
   // Generate order ID
   const generateOrderId = () => {

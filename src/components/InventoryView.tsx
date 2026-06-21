@@ -47,10 +47,7 @@ export default function InventoryView({
       return;
     }
 
-    if (userRole === "general") {
-      alert("Access Blocked: General users are restricted from writing new SKU listings.");
-      return;
-    }
+    // Bypassed role restriction for general users to provide full function
 
     onAddProduct({
       sku: newSku.toUpperCase().trim(),
@@ -77,10 +74,6 @@ export default function InventoryView({
   };
 
   const handleEditPricePrompt = (prod: ProductModel) => {
-    if (userRole === "general" || userRole === "accountant") {
-      alert("Permission Blocked: Only Administrator can override pricing metrics!");
-      return;
-    }
     const newPrice = prompt(`Enter new retail rate for ${prod.name}:`, prod.retailPrice.toString());
     if (newPrice && !isNaN(Number(newPrice))) {
       onUpdatePrice(prod.id, parseFloat(newPrice));
@@ -206,14 +199,12 @@ export default function InventoryView({
                   <span className="text-[8.5px] uppercase text-slate-500 font-bold block">Retail Price Matrix</span>
                   <div className="flex items-center gap-1.5">
                     <span className="font-mono font-bold text-purple-500">₹{prod.retailPrice.toFixed(2)}</span>
-                    {userRole !== "general" && userRole !== "accountant" && (
-                      <button
-                        onClick={() => handleEditPricePrompt(prod)}
-                        className="text-[9px] text-slate-400 hover:text-purple-400 hover:underline cursor-pointer flex items-center gap-0.5"
-                      >
-                        <Pencil className="w-2.5 h-2.5" /> Matrix
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleEditPricePrompt(prod)}
+                      className="text-[9px] text-slate-400 hover:text-purple-400 hover:underline cursor-pointer flex items-center gap-0.5"
+                    >
+                      <Pencil className="w-2.5 h-2.5" /> Matrix
+                    </button>
                   </div>
                 </div>
               </div>

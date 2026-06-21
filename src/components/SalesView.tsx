@@ -4,6 +4,7 @@ import {
   ArrowUpRight, Download, Printer, Percent, ShieldCheck, UserPlus
 } from "lucide-react";
 import { ProductModel, TransactionModel, UserRole } from "../types";
+import { jsPDF } from "jspdf";
 
 interface SalesViewProps {
   products: ProductModel[];
@@ -14,7 +15,7 @@ interface SalesViewProps {
     type: "sale" | "purchase" | "expense";
     category: string;
     paymentMethod: "Cash" | "Bank" | "Mobile Pay";
-  }) => void;
+  }) => any;
   isDark: boolean;
   onAddLog: (action: string, details: string) => void;
   userRole: UserRole;
@@ -31,13 +32,250 @@ export default function SalesView({
   // Calculator states
   const [selectedProduct, setSelectedProduct] = useState<string>(products[0]?.id || "");
   const [salesQty, setSalesQty] = useState<number>(1);
-  const [customClientName, setCustomClientName] = useState("Alpha Hardware Traders");
+  const [customClientName, setCustomClientName] = useState("");
   const [discountPercent, setDiscountPercent] = useState<number>(5);
   const [taxPercent, setTaxPercent] = useState<number>(18); // GST standard
   const [selectedPayment, setSelectedPayment] = useState<"Cash" | "Bank" | "Mobile Pay">("Bank");
 
   const [salesSearch, setSalesSearch] = useState("");
   const [showInvoicePrint, setShowInvoicePrint] = useState<TransactionModel | null>(null);
+
+  const generateInvoicePDF = (tx: TransactionModel) => {
+    try {
+      const doc = new jsPDF();
+      
+      let productName = "General Product / Unit Service";
+      let quantity = 1;
+      let clientName = "Alpha Hardware Traders";
+      
+      const title = tx.title;
+      if (title.startsWith("Sale - ")) {
+        const parts = title.substring(7).split(" to ");
+        if (parts.length >= 2) {
+          clientName = parts.slice(1).join(" to ");
+        }
+        const itemPart = parts[0];
+        const qMatch = itemPart.match(/\(x(\d+)\)/);
+        if (qMatch) {
+          quantity = parseInt(qMatch[1]) || 1;
+          productName = itemPart.replace(/\(x\d+\)/, "").trim();
+        } else {
+          productName = itemPart.trim();
+        }
+      } else {
+        productName = title;
+      }
+
+      const total = tx.amount;
+      const calculatedUnitPrice = total / quantity;
+
+      // Card / Border background
+      doc.setDrawColor(241, 245, 249);
+      doc.setFillColor(255, 255, 255);
+      
+      // Top header band
+      doc.setFillColor(16, 185, 129); // emerald-500
+      doc.rect(0, 0, 210, 15, "F");
+
+      // App Title Branding
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(15, 23, 42); // slate-900
+      doc.text("SUCCESS ERP SOLUTIONS", 14, 32);
+
+      doc.setFontSize(9);
+      doc.setFont("Helvetica", "normal");
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.text("Automated Cloud Ledger Accounting Portal", 14, 38);
+      
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(14, 45, 196, 45);
+
+      // Left Column: Client Bill To Info
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("BILL TO:", 14, 56);
+      
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(16, 185, 129); // emerald-500
+      doc.text(clientName, 14, 62);
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text("Business Client Account", 14, 68);
+      doc.text(`Payment Mode: ${tx.paymentMethod}`, 14, 73);
+
+      // Right Column: Invoice Details Info
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("INVOICE METADATA:", 120, 56);
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Invoice Ref:   ${tx.referenceNumber}`, 120, 62);
+      doc.text(`Date Created:  ${new Date(tx.timestamp).toLocaleString()}`, 120, 68);
+      doc.text(`Auditor Role:  ${tx.loggedBy}`, 120, 73);
+      doc.text(`Billing Status: PAID`, 120, 78);
+
+      // Main Table of charges
+      const tableTop = 90;
+      doc.setFillColor(241, 245, 249);
+      doc.rect(14, tableTop, 182, 8, "F");
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text("Line Item / Service Description", 18, tableTop + 5.5);
+      doc.text("Qty", 120, tableTop + 5.5);
+      doc.text("Unit Price (INR)", 140, tableTop + 5.5);
+      doc.text("Total (INR)", 170, tableTop + 5.5);
+
+      // Data Row
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(productName, 18, tableTop + 14);
+      doc.text(String(quantity), 120, tableTop + 14);
+      doc.text(calculatedUnitPrice.toFixed(2), 140, tableTop + 14);
+      doc.text(total.toFixed(2), 170, tableTop + 14);
+
+      // Row separator line
+      doc.setDrawColor(241, 245, 249);
+      doc.line(14, tableTop + 19, 196, tableTop + 19);
+
+      // Summary Totals Right Align
+      const summaryTop = tableTop + 28;
+      
+      doc.setFont("Helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("Gross Ledger Value:", 115, summaryTop);
+      doc.setFont("Helvetica", "normal");
+      doc.setTextColor(15, 23, 42);
+      doc.text(`INR ${total.toFixed(2)}`, 165, summaryTop);
+
+      doc.setFont("Helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("Total Paid Due (Net):", 115, summaryTop + 7);
+      doc.setFont("Helvetica", "bold");
+      doc.setTextColor(16, 185, 129); // Green
+      doc.text(`INR ${total.toFixed(2)}`, 165, summaryTop + 7);
+
+      // Seal and Signatory Area
+      const sealTop = summaryTop + 20;
+      doc.setDrawColor(16, 185, 129); // emerald
+      doc.setFillColor(240, 253, 250); // emerald-50
+      doc.rect(14, sealTop, 75, 26, "FD");
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(4, 120, 87); // emerald-700
+      doc.text("SUCCESS ERP COMPLIANCE", 18, sealTop + 6.5);
+      
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(110, 120, 135);
+      doc.text("Verification Code: SUCCESS-SHA-256", 18, sealTop + 12);
+      doc.text("Authority: Automatic ERP System Seal", 18, sealTop + 17);
+      doc.text("Status: VERIFIED & CLEAR", 18, sealTop + 22);
+
+      // System Signature Placeholders
+      doc.setDrawColor(226, 232, 240);
+      doc.line(130, sealTop + 18, 190, sealTop + 18);
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Receiver Signature", 145, sealTop + 23);
+
+      // Bottom informational footer
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184); // slate-400
+      doc.text("Disclaimer: This is a computer-generated tax transaction slip conforming to matching business records.", 14, sealTop + 38);
+      doc.text("All sales are subject to standard return policy terms mentioned in custom ERP service parameters.", 14, sealTop + 42);
+
+      // Save PDF
+      doc.save(`Invoice_${tx.referenceNumber}.pdf`);
+      onAddLog("PDF_GENERATED", `Successfully exported PDF Invoice Ref: ${tx.referenceNumber}`);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      alert("Error generating PDF: " + (error instanceof Error ? error.message : String(error)));
+    }
+  };
+
+  const generateInvoiceTXT = (tx: TransactionModel) => {
+    try {
+      let productName = "General Product / Unit Service";
+      let quantity = 1;
+      let clientName = "Alpha Hardware Traders";
+      
+      const title = tx.title;
+      if (title.startsWith("Sale - ")) {
+        const parts = title.substring(7).split(" to ");
+        if (parts.length >= 2) {
+          clientName = parts.slice(1).join(" to ");
+        }
+        const itemPart = parts[0];
+        const qMatch = itemPart.match(/\(x(\d+)\)/);
+        if (qMatch) {
+          quantity = parseInt(qMatch[1]) || 1;
+          productName = itemPart.replace(/\(x\d+\)/, "").trim();
+        } else {
+          productName = itemPart.trim();
+        }
+      } else {
+        productName = title;
+      }
+
+      const total = tx.amount;
+      const calculatedUnitPrice = total / quantity;
+
+      const divider = "==================================================\n";
+      const dotted = "--------------------------------------------------\n";
+
+      let out = "";
+      out += divider;
+      out += "               SUCCESS ERP SOLUTIONS              \n";
+      out += "              OFFICIAL SECURE TAX INVOICE          \n";
+      out += divider;
+      out += `Reference:    ${tx.referenceNumber}\n`;
+      out += `Timestamp:    ${new Date(tx.timestamp).toLocaleString()}\n`;
+      out += `Auditor Agent: ${tx.loggedBy}\n`;
+      out += `Payment Mode: ${tx.paymentMethod}\n`;
+      out += divider;
+      out += `BILL TO:\n`;
+      out += `Client Name:  ${clientName}\n`;
+      out += divider;
+      out += `ITEMIZED LEDGER CHARGES:\n`;
+      out += `Description:  ${productName}\n`;
+      out += `Quantity:     ${quantity}\n`;
+      out += `Unit Price:   INR ${calculatedUnitPrice.toFixed(2)}\n`;
+      out += dotted;
+      out += `TOTAL CASH REVENUE REC: INR ${total.toFixed(2)}\n`;
+      out += divider;
+      out += "         LEDGER RECORD BROADCAST SUCCESS          \n";
+      out += "       Thank you for your business / trust!       \n";
+      out += divider;
+
+      const blob = new Blob([out], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice_${tx.referenceNumber}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      onAddLog("TXT_GENERATED", `Successfully exported Text Receipt Ref: ${tx.referenceNumber}`);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Retrieve selected item specs
   const targetProd = products.find(p => p.id === selectedProduct) || products[0];
@@ -64,7 +302,7 @@ export default function SalesView({
     }
 
     const receiptTitle = `Sale - ${targetProd.name} (x${salesQty}) to ${customClientName}`;
-    onAddTransaction({
+    const newTx = onAddTransaction({
       title: receiptTitle,
       amount: totalBill,
       type: "sale",
@@ -76,7 +314,13 @@ export default function SalesView({
     
     // Reset quantities
     setSalesQty(1);
-    alert("Enterprise Sale logged, stock decremented, and cash receipt broadcasted to General Journal!");
+    
+    // Instantly open the invoice spec modal for printing/downloading PDF!
+    if (newTx) {
+      setShowInvoicePrint(newTx);
+    } else {
+      alert("Enterprise Sale logged, stock decremented, and cash receipt broadcasted to General Journal!");
+    }
   };
 
   const calculateTotalSalesToday = () => {
@@ -173,6 +417,7 @@ export default function SalesView({
               <input
                 type="text"
                 required
+                placeholder="Enter Client Name"
                 value={customClientName}
                 onChange={(e) => setCustomClientName(e.target.value)}
                 className={`w-full py-2 px-3 text-xs rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500/30 ${
@@ -357,22 +602,31 @@ export default function SalesView({
               <span>₹{showInvoicePrint.amount.toFixed(2)}</span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 mt-4">
               <button
                 onClick={() => {
-                  alert("ASCII Receipt binary broadcast pushed to client download!");
-                  setShowInvoicePrint(null);
+                  generateInvoicePDF(showInvoicePrint);
                 }}
-                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-center cursor-pointer font-bold"
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-white rounded-xl text-center cursor-pointer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
               >
-                Download TXT
+                <Download className="w-3.5 h-3.5" /> Download PDF Invoice
               </button>
-              <button
-                onClick={() => setShowInvoicePrint(null)}
-                className="flex-1 py-2 bg-emerald-500 text-white rounded-lg text-center cursor-pointer font-bold"
-              >
-                Close Memo
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    generateInvoiceTXT(showInvoicePrint);
+                  }}
+                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 active:scale-[0.99] text-slate-200 rounded-lg text-center cursor-pointer font-bold text-[11px]"
+                >
+                  Download TXT
+                </button>
+                <button
+                  onClick={() => setShowInvoicePrint(null)}
+                  className="flex-1 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 rounded-lg text-center cursor-pointer font-bold text-[11px]"
+                >
+                  Close Memo
+                </button>
+              </div>
             </div>
           </div>
         </div>

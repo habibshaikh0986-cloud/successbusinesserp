@@ -146,8 +146,8 @@ export default function AuthView({
       if (otpPurpose === "register") {
         onAddLog("USER_OTP_REGISTER_SUCCESS", `Signup OTP verification approved for ${name} [${role.toUpperCase()}]`);
         
-        // Admin registrations are auto-approved so they can log in right away and approve others!
-        const isApproved = role === "admin";
+        // Admin, Accountant, and General registrations are auto-approved so they can log in right away!
+        const isApproved = true;
         
         const newUser: UserModel = {
           uid: `user-${Date.now()}`,
@@ -289,14 +289,17 @@ export default function AuthView({
                       // Only prefill mock credentials as an onboarding sandbox helper if inputs are current empty
                       if (!email && !password) {
                         if (roleType === "admin") {
-                          setName("Alexander Sterling");
-                          setEmail("admin@success-erp.com");
+                          setName("Habib Shaikh");
+                          setEmail("habibshaikh0986@gmail.com");
+                          setPassword("admin");
                         } else if (roleType === "accountant") {
                           setName("Alex Wong");
                           setEmail("alex.wong@success-erp.com");
+                          setPassword("123");
                         } else {
                           setName("Marcus Lane");
                           setEmail("general.user@success-erp.com");
+                          setPassword("general");
                         }
                       }
                     }}

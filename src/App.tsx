@@ -27,19 +27,17 @@ export default function App() {
   
   // Registered dynamic user accounts database
   const [registeredUsers, setRegisteredUsers] = useState<UserModel[]>(() => {
-    const saved = localStorage.getItem("success_erp_users");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {
-        // fail-safe
-      }
-    }
-    // Default initial demo sandbox users (compares exactly with mock profiles but in checkable entries!)
-    return [
+    const defaultUsers = [
+      {
+        uid: "user-habib-admin",
+        email: "habibshaikh0986@gmail.com",
+        name: "Habib Shaikh",
+        role: "admin",
+        phoneNumber: "9819283746",
+        isEmailVerified: true,
+        password: "admin",
+        isApproved: true
+      },
       {
         uid: "user-default-admin",
         email: "admin@success-erp.com",
@@ -68,9 +66,36 @@ export default function App() {
         phoneNumber: "+91 96543 21098",
         isEmailVerified: true,
         password: "general",
-        isApproved: false // Awaits admin approval, immediately demonstrating the feature!
-      },
+        isApproved: true
+      }
     ];
+
+    const saved = localStorage.getItem("success_erp_users");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          // Check if Habib is missing from the list and inject him in localStorage-supported sessions too
+          const hasHabib = parsed.some(u => u.email.toLowerCase() === "habibshaikh0986@gmail.com");
+          if (!hasHabib) {
+            parsed.push({
+              uid: "user-habib-admin",
+              email: "habibshaikh0986@gmail.com",
+              name: "Habib Shaikh",
+              role: "admin",
+              phoneNumber: "9819283746",
+              isEmailVerified: true,
+              password: "admin",
+              isApproved: true
+            });
+          }
+          return parsed;
+        }
+      } catch (e) {
+        // fail-safe
+      }
+    }
+    return defaultUsers;
   });
 
   useEffect(() => {
@@ -172,6 +197,8 @@ export default function App() {
         })
       );
     }
+
+    return tx;
   };
 
   const handleReplenishStock = (id: string, qty: number) => {
@@ -191,10 +218,6 @@ export default function App() {
 
   // Quick price adjustment tool (Admin/Accountant Only)
   const handleUpdatePrice = (id: string, newRetail: number) => {
-    if (userRole === "general") {
-      alert("Permission Blocked: Only Administrator or Accountant details override price matrices!");
-      return;
-    }
     setProducts((items) => 
       items.map((prod) => {
         if (prod.id === id) {
@@ -751,8 +774,9 @@ export default function App() {
                       onReplenishStock={handleReplenishStock}
                       isDark={isMobileDark}
                       onAddLog={handleAddLog}
-                  />
-                )}
+                      onNavigate={setActiveScreen}
+                    />
+                  )}
 
                 {activeScreen === "customers" && (
                   <CustomersView

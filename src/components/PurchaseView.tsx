@@ -33,7 +33,7 @@ export default function PurchaseView({
   // States
   const [selectedProduct, setSelectedProduct] = useState<string>(products[0]?.id || "");
   const [purchaseQty, setPurchaseQty] = useState<number>(10);
-  const [selectedSupplier, setSelectedSupplier] = useState("Vortex Industrial Wholesalers");
+  const [selectedSupplier, setSelectedSupplier] = useState("");
   const [purchasePriceOverride, setPurchasePriceOverride] = useState<string>("");
   const [purchasePaymentMethod, setPurchasePaymentMethod] = useState<"Cash" | "Bank" | "Mobile Pay">("Bank");
   
@@ -61,10 +61,12 @@ export default function PurchaseView({
     e.preventDefault();
     if (!targetProd) return;
 
-    if (userRole === "general") {
-      alert("Permission Blocked: General user credentials cannot post outward procurement journals.");
+    if (!selectedSupplier) {
+      alert("Please select a Supplier Source.");
       return;
     }
+
+    // Bypassed role restriction for general users to provide full function
 
     const title = `Purchase - Stock refill of ${targetProd.name} (x${purchaseQty}) from ${selectedSupplier}`;
     onAddTransaction({
@@ -90,10 +92,7 @@ export default function PurchaseView({
       alert("Stock levels are optimized. No reorder items found.");
       return;
     }
-    if (userRole === "general") {
-      alert("General user permission insufficient for bulk restocking operations.");
-      return;
-    }
+    // Bypassed role restriction for general users to provide full function
 
     pendingReorderItems.forEach((p) => {
       const unitsToBuy = p.minRequiredStock * 2;
@@ -210,12 +209,14 @@ export default function PurchaseView({
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Supplier Source</label>
               <select
+                required
                 value={selectedSupplier}
                 onChange={(e) => setSelectedSupplier(e.target.value)}
                 className={`w-full py-2 px-3 text-xs rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500/30 ${
                   isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                 }`}
               >
+                <option value="">— Select Supplier Source —</option>
                 {suppliersList.map(sup => (
                   <option key={sup} value={sup}>{sup}</option>
                 ))}

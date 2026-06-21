@@ -3,7 +3,7 @@ import {
   TrendingUp, TrendingDown, DollarSign, Wallet, Warehouse, Users, 
   ShoppingBag, ArrowUpRight, ArrowDownLeft, AlertCircle, Plus, 
   X, Check, Lock, ChevronDown, UserCheck, RefreshCw, BarChart2, ShieldCheck, MapPin,
-  ChevronRight
+  ChevronRight, Receipt
 } from "lucide-react";
 import { UserRole, TransactionModel, ProductModel, SystemLogModel } from "../types";
 import { AnimatePresence, motion } from "motion/react";
@@ -19,6 +19,7 @@ interface DashboardViewProps {
   onReplenishStock: (id: string, qty: number) => void;
   isDark: boolean;
   onAddLog: (action: string, details: string) => void;
+  onNavigate: (screen: "dashboard" | "customers" | "sales" | "purchase" | "inventory" | "reports" | "settings") => void;
 }
 
 export default function DashboardView({
@@ -30,7 +31,8 @@ export default function DashboardView({
   onAddTransaction,
   onReplenishStock,
   isDark,
-  onAddLog
+  onAddLog,
+  onNavigate
 }: DashboardViewProps) {
   // Local state for interactive modals and filters
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,11 +79,7 @@ export default function DashboardView({
     e.preventDefault();
     if (!txTitle || !txAmount || isNaN(Number(txAmount))) return;
     
-    // Check permission restrictions for safety
-    if (userRole === "general" && txType === "expense") {
-      alert("Permission Denied: General users are restricted from recording custom office expenses.");
-      return;
-    }
+    // Check permission restrictions for safety (Bypassed for general users)
 
     onAddTransaction({
       title: txTitle,
@@ -98,10 +96,7 @@ export default function DashboardView({
   };
 
   const isRestricted = (metric: string) => {
-    // General user has strict restrictions: Only Today Sales, stock level count. Rest are locked.
-    if (userRole === "general") {
-      return ["profit", "purchase", "expense", "bank", "cash", "outstanding"].includes(metric);
-    }
+    // All metrics are fully open & accessible to general users
     return false;
   };
 
@@ -200,6 +195,34 @@ export default function DashboardView({
         <p className="text-xs text-slate-500">
           Last sync: Real-time. Operating under {userRole} mode.
         </p>
+      </div>
+
+      {/* QUICK QUICK-ACTIONS PANEL (High conversion buttons matching requirements) */}
+      <div className="px-4 py-2 mt-1">
+        <div className={`p-4 rounded-[24px] border ${
+          isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-150 shadow-xs"
+        }`}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md inline-block">Instant Billing Panel</span>
+              <h3 className={`text-xs sm:text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                Quick Billing & GST Invoice Desk
+              </h3>
+            </div>
+            
+            <button
+              onClick={() => {
+                onNavigate("sales");
+                onAddLog("CLICK_CREATE_INVOICE", "User initiated instant sales invoice generator from homepage shortcut");
+              }}
+              className="px-6 py-3 bg-linear-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15 cursor-pointer outline-none transition-transform active:scale-[0.98]"
+            >
+              <Receipt className="w-4 h-4 stroke-[2.5]" />
+              <span>Create New Invoice (नया बिल बनाएं)</span>
+              <Plus className="w-3.5 h-3.5 stroke-[3px]" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* GRID 1: High Level Metrics */}
