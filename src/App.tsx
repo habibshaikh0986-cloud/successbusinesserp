@@ -33,7 +33,7 @@ export default function App() {
         email: "habibshaikh0986@gmail.com",
         name: "Habib Shaikh",
         role: "admin",
-        phoneNumber: "9819283746",
+        phoneNumber: "9973214998",
         isEmailVerified: true,
         password: "admin",
         isApproved: true
@@ -83,7 +83,7 @@ export default function App() {
               email: "habibshaikh0986@gmail.com",
               name: "Habib Shaikh",
               role: "admin",
-              phoneNumber: "9819283746",
+              phoneNumber: "9973214998",
               isEmailVerified: true,
               password: "admin",
               isApproved: true
@@ -104,12 +104,12 @@ export default function App() {
 
   // Authenticated account details
   const [userRole, setUserRole] = useState<UserRole>("admin");
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [workPhone, setWorkPhone] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [gstNo, setGstNo] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
+  const [userName, setUserName] = useState("Habib Shaikh");
+  const [userEmail, setUserEmail] = useState("habibshaikh0986@gmail.com");
+  const [workPhone, setWorkPhone] = useState("9973214998");
+  const [businessName, setBusinessName] = useState("Success ERP Solution");
+  const [gstNo, setGstNo] = useState("10ABH5006541");
+  const [businessAddress, setBusinessAddress] = useState("DHAKA MOTIHARI (BIHAR)- 845418");
   
   // Live dynamic database states
   const [products, setProducts] = useState<ProductModel[]>(initialProducts);
@@ -196,6 +196,27 @@ export default function App() {
           return prod;
         })
       );
+    }
+
+    // If it's a sale, detect target item name and quantity, then decrement its stock!
+    if (newTx.type === "sale") {
+      // Format of sale title: `Sale - ${productName} (x${qty}) to ${client}`
+      const match = newTx.title.match(/Sale\s*-\s*(.*?)\s*\(x(\d+)\)\s*to/i);
+      if (match) {
+        const prodNameFromTitle = match[1].trim();
+        const saleQty = parseInt(match[2]) || 1;
+        setProducts((items) =>
+          items.map((prod) => {
+            if (prod.name.toLowerCase() === prodNameFromTitle.toLowerCase()) {
+              return {
+                ...prod,
+                currentStock: Math.max(0, prod.currentStock - saleQty)
+              };
+            }
+            return prod;
+          })
+        );
+      }
     }
 
     return tx;
@@ -530,8 +551,13 @@ export default function App() {
                     {/* Dynamic Brand Logo */}
                     <div className="relative group">
                       <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-rose-500 rounded-xl blur-xs opacity-60 group-hover:opacity-100 transition duration-500"></div>
-                      <div className="relative w-10 h-10 bg-slate-950 text-white rounded-xl flex items-center justify-center shadow-lg border border-slate-800">
-                        <Briefcase className="w-5 h-5 text-sky-400 group-hover:scale-110 transition duration-300" />
+                      <div className="relative w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden p-1">
+                        <img 
+                          src="/src/assets/images/success_logo_1782065863976.jpg" 
+                          referrerPolicy="no-referrer"
+                          alt="Success Logo" 
+                          className="w-full h-full object-contain group-hover:scale-110 transition duration-300"
+                        />
                       </div>
                     </div>
 
@@ -784,6 +810,10 @@ export default function App() {
                     onAddLog={handleAddLog}
                     userRole={userRole}
                     userName={userName}
+                    businessName={businessName}
+                    gstNo={gstNo}
+                    businessAddress={businessAddress}
+                    workPhone={workPhone}
                   />
                 )}
 
@@ -795,6 +825,10 @@ export default function App() {
                     isDark={isMobileDark}
                     onAddLog={handleAddLog}
                     userRole={userRole}
+                    businessName={businessName}
+                    gstNo={gstNo}
+                    businessAddress={businessAddress}
+                    workPhone={workPhone}
                   />
                 )}
 

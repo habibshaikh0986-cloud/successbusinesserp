@@ -29,10 +29,10 @@ export default function AuthView({
   const setAuthMode = controlledSetAuthMode !== undefined ? controlledSetAuthMode : setLocalAuthMode;
   
   // Input fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("habibshaikh0986@gmail.com");
+  const [password, setPassword] = useState("admin");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState("Habib Shaikh");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState<UserRole>("admin");
   const [showPassword, setShowPassword] = useState(false);
@@ -213,8 +213,13 @@ export default function AuthView({
     <div className="flex flex-col h-full bg-linear-to-b from-blue-600/5 via-transparent to-transparent font-sans overflow-y-auto">
       {/* Top App Identity */}
       <div className="pt-8 pb-4 text-center px-4 flex flex-col items-center">
-        <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mb-3.5">
-          <ShieldCheck className="w-8 h-8" />
+        <div className="w-16 h-16 bg-white ring-1 ring-slate-100 dark:ring-slate-800 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg shadow-blue-500/10 mb-3.5 p-1.5">
+          <img 
+            src="/src/assets/images/success_logo_1782065863976.jpg" 
+            referrerPolicy="no-referrer"
+            alt="Success Logo" 
+            className="w-full h-full object-contain"
+          />
         </div>
         <h1 className={`text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
           Success Business

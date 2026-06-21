@@ -17,6 +17,10 @@ interface CustomersViewProps {
   onAddLog: (action: string, details: string) => void;
   userRole: UserRole;
   userName: string;
+  businessName?: string;
+  gstNo?: string;
+  businessAddress?: string;
+  workPhone?: string;
 }
 
 // Initial Mock Customers
@@ -31,7 +35,16 @@ const initialCommunicationsList: CustomerCommunication[] = [];
 // Initial Notifications / Alerts
 const initialNotificationsList: CustomerNotification[] = [];
 
-export default function CustomersView({ isDark, onAddLog, userRole, userName }: CustomersViewProps) {
+export default function CustomersView({ 
+  isDark, 
+  onAddLog, 
+  userRole, 
+  userName,
+  businessName,
+  gstNo,
+  businessAddress,
+  workPhone 
+}: CustomersViewProps) {
   // --- Core States ---
   const [customers, setCustomers] = useState<CustomerModel[]>(initialCustomersList);
   const [ledgerEntries, setLedgerEntries] = useState<CustomerLedgerEntry[]>(initialLedgerEntries);
@@ -383,14 +396,16 @@ export default function CustomersView({ isDark, onAddLog, userRole, userName }: 
 
       // App Title Branding
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(22);
+      doc.setFontSize(16);
       doc.setTextColor(15, 23, 42); // slate-900
-      doc.text("SUCCESS ERP SOLUTIONS", 14, 32);
+      doc.text((businessName || "SUCCESS ERP SOLUTION").toUpperCase(), 14, 25);
 
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setFont("Helvetica", "normal");
-      doc.setTextColor(100, 116, 139); // slate-500
-      doc.text("Automated Customer Statement & Balance Reconciliation Desk", 14, 38);
+      doc.setTextColor(71, 85, 105); // slate-600
+      doc.text(`Address: ${businessAddress || "DHAKA MOTIHARI (BIHAR)- 845418"}`, 14, 31);
+      doc.text(`GSTIN/GST No: ${gstNo || "10ABH5006541"} | Phone/Mob: ${workPhone || "9973214998"}`, 14, 37);
+      doc.text("Compliance Class: Automated Customer Statement & Balance Reconciliation Desk", 14, 42);
       
       // Divider
       doc.setDrawColor(226, 232, 240);
